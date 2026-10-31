@@ -308,6 +308,9 @@ export function texToUnicode(tex: string, opts: { display?: boolean; width?: num
 
 export type Formula = { display: boolean; tex: string }
 
+const hide = (s: string) => s.replace(/```[\s\S]*?```|`[^`\n]*`/g, m => ' '.repeat(m.length))
+
+
 const MATH =
   /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|\\begin\{(equation|align|gather)(\*?)\}([\s\S]+?)\\end\{\4\5\}|(?<![\\$])\$(?![\s$])([^$\n]+?)(?<![\s\\])\$(?!\d)/g
 
@@ -319,4 +322,21 @@ export function extractMath(text: string): Formula[] {
     const tex = m[1] ?? m[2] ?? m[3] ?? m[6] ?? m[7]
     return { display: m[7] === undefined && m[3] === undefined, tex: tex.trim() }
   })
+}
+
+// Replaces every formula in a markdown text by its Unicode form, so the chat itself reads well.
+// Several-row formulas go into a code block (keeps the columns aligned); one-row display math becomes a code span.
+// shortcut: a several-row formula inside a list item breaks the list's indent; only the first 50k characters are searched
+export function renderMath(text: string, width = 72): string {
+  const head = text.slice(0, 50_000)
+  const hits = [...hide(head).matchAll(MATH)]
+  let out = head
+  for (const m of hits.reverse()) {
+    const tex = (m[1] ?? m[2] ?? m[3] ?? m[6] ?? m[7]).trim()
+    const display = m[7] === undefined && m[3] === undefined
+    const lines = texToUnicode(tex, { display, width })
+    const body = !display ? lines.join(' ') : lines.length > 1 ? `\n\n\`\`\`\n${lines.join('\n')}\n\`\`\`\n\n` : `\`${lines[0]}\``
+    out = out.slice(0, m.index) + body + out.slice(m.index! + m[0].length)
+  }
+  return out + text.slice(50_000)
 }

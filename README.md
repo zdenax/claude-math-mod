@@ -12,6 +12,7 @@ Obrázek „po" je render textu, který vrací překladač (`texToUnicode`), ne 
 
 ## Použití
 
+- **Chat:** mod přepisuje vykreslení každého bloku odpovědi asistenta (`ui.render` na `AssistantMessage`): vzorce `$…$` a `$$…$$` se v chatu ukážou jako Unicode, víceřádkové ve code blocku, kód a běžný text zůstane. Uložená zpráva se nemění.
 - Po každé hlavní odpovědi (ne subagentů) mod najde `$…$`, `$$…$$`, `\[…\]`, `\(…\)` a `\begin{equation|align|gather}`; kód a code-fence přeskakuje.
 - Panel „LaTeX" se jednou za session otevře sám. `/tex` ho otevře znovu, `/tex <vzorec>` zobrazí zadaný text.
 - Instalace: `/plugin install latex-pane --marketplace zdenax/claude-math-mod`, pak `/reload-plugins`. Z naklonovaného repa: `claude plugin marketplace add ./` a `claude plugin install latex-pane@claude-math-mod`. Jednorázově bez instalace: `claude --plugin-dir ./latex-pane`.

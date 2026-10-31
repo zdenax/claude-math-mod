@@ -1,6 +1,6 @@
 // Run: node --experimental-strip-types latex-pane/latex.selftest.ts
 import assert from 'node:assert/strict'
-import { extractMath, texToUnicode } from './hooks/latex.ts'
+import { extractMath, renderMath, texToUnicode } from './hooks/latex.ts'
 
 const flat = (t: string) => texToUnicode(t, { display: false }).join('\n')
 const wide = (t: string) => texToUnicode(t, { display: true }).join('\n')
@@ -44,5 +44,13 @@ assert.deepEqual(extractMath(reply), [
 const fast = (f: () => unknown) => { const t0 = Date.now(); f(); assert.ok(Date.now() - t0 < 1000) }
 for (const bad of [String.raw`\frac{`.repeat(24), String.raw`\frac{`.repeat(600), String.raw`\underbrace{`.repeat(24)]) fast(() => texToUnicode(bad, { display: true }))
 fast(() => extractMath('\\['.repeat(50000)))
+
+// the chat: formulas become Unicode, code and prose stay
+const chat = renderMath('A $x^2$ b\n$$\\frac{a}{b}$$\n`$no$` a ```\n$$no$$\n```')
+assert.ok(chat.includes('A x² b'))
+assert.ok(chat.includes('```\n a \n───\n b\n```') || chat.includes('a/b') || chat.includes('─'))
+assert.ok(chat.includes('`$no$`') && chat.includes('$$no$$'))
+assert.equal(renderMath('no math here'), 'no math here')
+fast(() => renderMath('\\['.repeat(50000)))
 
 console.log('latex selftest OK')

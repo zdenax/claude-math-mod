@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { Register } from 'claude-code'
 
 import type { Formula } from '../types'
-import { extractMath, texToUnicode } from './latex'
+import { extractMath, renderMath, texToUnicode } from './latex'
 
 const PANE = 'latex'
 // Change the tag when Formula changes: an earlier version's stored value is declined.
@@ -43,6 +43,13 @@ export const register: Register = on => {
     await $.ui.open({ id: PANE, title: 'LaTeX' })
 
     return { text: 'LaTeX pane opened.' }
+  })
+
+  // the chat itself: every assistant block is drawn with its formulas as Unicode (the stored message stays as written)
+  on('ui.render', { component: 'AssistantMessage' }, async ($, e, next) => {
+    const text = e.props.text
+    if (typeof text !== 'string' || !/[$\\]/.test(text)) return next(e)
+    return next({ ...e, props: { ...e.props, text: renderMath(text) } })
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
