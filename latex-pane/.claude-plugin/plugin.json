@@ -1,0 +1,6 @@
+{
+  "name": "latex-pane",
+  "version": "0.1.0",
+  "description": "Side pane that shows LaTeX from the last answer as readable Unicode text",
+  "types": "./types/index.d.ts"
+}
