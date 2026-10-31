@@ -1,0 +1,7 @@
+{
+  "name": "claude-math-mod",
+  "owner": { "name": "zdenax" },
+  "plugins": [
+    { "name": "latex-pane", "source": "./latex-pane", "description": "Side pane that shows LaTeX from the last answer as readable Unicode text" }
+  ]
+}
