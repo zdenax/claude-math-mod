@@ -29,3 +29,7 @@ node --experimental-strip-types latex-pane/latex.selftest.ts
 ```
 
 Napsal Claude (Sonnet 5.5) na zadání Zdeňka Toušky; vývoj a ověření proběhly 31. 10. 2026.
+
+## Licence
+
+MIT, viz [LICENSE](LICENSE).
