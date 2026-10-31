@@ -38,7 +38,7 @@ export const register: Register = on => {
     if (text) {
       const found = extractMath(text)
       // no $...$ in the argument: take the whole argument as one display formula
-      await update($, formulas, () => (found.length > 0 ? found : [{ display: true, tex: text }]))
+      await update($, formulas, () => (found.length > 0 ? found : [{ display: true, tex: text }]).slice(0, 50))
     }
     await $.ui.open({ id: PANE, title: 'LaTeX' })
 
@@ -53,10 +53,10 @@ export const register: Register = on => {
     return (
       <Box flexDirection="column">
         {list.length === 0 && <Text dimColor>No LaTeX in the last answer.</Text>}
-        {list.map((f: Formula) => (
-          <Box flexDirection="column" marginBottom={1}>
-            {texToUnicode(f.tex, { display: f.display, width: room }).map(line => (
-              <Text wrap="truncate-end">{line || ' '}</Text>
+        {list.map((f: Formula, i: number) => (
+          <Box key={i} flexDirection="column" marginBottom={1}>
+            {texToUnicode(f.tex, { display: f.display, width: room }).map((line, j) => (
+              <Text key={j} wrap="truncate-end">{line || ' '}</Text>
             ))}
           </Box>
         ))}

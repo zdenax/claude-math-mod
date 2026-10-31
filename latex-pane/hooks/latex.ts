@@ -236,7 +236,7 @@ class Parser {
       case 'frac': case 'dfrac': case 'tfrac': {
         const a = this.arg(), d = this.arg()
         if (this.flat || a.l.length > 1 || d.l.length > 1) {
-          const s = (x: Box) => x.l.join(' ')
+          const s = (x: Box) => { const j = x.l.join(' '); if (j.length > 1000) throw new Error('too big'); return j } // stops exponential growth of nested fractions
           return t(`${paren(s(a))}/${paren(s(d))}`, 'w')
         }
         const w = Math.max(cw(a.l[0]), cw(d.l[0])) + 2
@@ -272,7 +272,7 @@ class Parser {
         const x = this.arg(), up = n === 'overbrace'
         this.ws()
         const lab = this.s[this.i] === (up ? '^' : '_') ? (this.i++, this.arg()) : box('')
-        if (this.flat || x.l.length > 1) return t(`${x.l.join(' ')}⏟${lab.l[0] ? `(${lab.l[0]})` : ''}`)
+        if (this.flat || x.l.length > 1) return t(`${(() => { const j = x.l.join(' '); if (j.length > 1000) throw new Error('too big'); return j })()}⏟${lab.l[0] ? `(${lab.l[0]})` : ''}`)
         const w = Math.max(cw(x.l[0]), cw(lab.l[0]))
         const br = up ? '╭' + '─'.repeat(Math.max(0, w - 2)) + '╮' : '╰' + '─'.repeat(Math.max(0, w - 2)) + '╯'
         const l = up ? [center(lab.l[0], w), br, center(x.l[0], w)] : [center(x.l[0], w), br, center(lab.l[0], w)]
@@ -293,8 +293,12 @@ export function texToUnicode(tex: string, opts: { display?: boolean; width?: num
   const room = opts.width ?? 80
   try {
     for (const flat of opts.display ? [false, true] : [true]) {
-      const lines = new Parser(src, flat).top().l.map(s => s.trimEnd())
-      if (flat || Math.max(...lines.map(cw)) <= room) return lines
+      try {
+        const lines = new Parser(src, flat).top().l.map(s => s.trimEnd())
+        if (flat || Math.max(...lines.map(cw)) <= room) return lines
+      } catch (e) {
+        if (flat) throw e // the several-row pass failed: still try the one-row pass
+      }
     }
   } catch {
     /* fall through to the raw text */
@@ -308,8 +312,9 @@ const MATH =
   /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]|\\\(([\s\S]+?)\\\)|\\begin\{(equation|align|gather)(\*?)\}([\s\S]+?)\\end\{\4\5\}|(?<![\\$])\$(?![\s$])([^$\n]+?)(?<![\s\\])\$(?!\d)/g
 
 // shortcut: `$...$` is guessed (no space inside the edges, no digit after), so odd prose with two dollar signs may slip through
+// shortcut: only the first 50k characters are searched (the regex is quadratic on unmatched `\[`), raise if long answers lose formulas
 export function extractMath(text: string): Formula[] {
-  const noCode = text.replace(/```[\s\S]*?```|`[^`\n]*`/g, m => ' '.repeat(m.length))
+  const noCode = text.slice(0, 50_000).replace(/```[\s\S]*?```|`[^`\n]*`/g, m => ' '.repeat(m.length))
   return [...noCode.matchAll(MATH)].map(m => {
     const tex = m[1] ?? m[2] ?? m[3] ?? m[6] ?? m[7]
     return { display: m[7] === undefined && m[3] === undefined, tex: tex.trim() }

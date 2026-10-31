@@ -1,4 +1,4 @@
-// Run: node --experimental-strip-types /home/zdenek/.claude/dev-mods/*/latex-pane/latex.selftest.ts
+// Run: node --experimental-strip-types latex-pane/latex.selftest.ts
 import assert from 'node:assert/strict'
 import { extractMath, texToUnicode } from './hooks/latex.ts'
 
@@ -40,4 +40,9 @@ assert.deepEqual(extractMath(reply), [
   { display: true, tex: '\\frac{a}{b}' },
   { display: true, tex: 'y' },
 ])
+// pathological input must stay fast (nested fractions used to grow exponentially)
+const fast = (f: () => unknown) => { const t0 = Date.now(); f(); assert.ok(Date.now() - t0 < 1000) }
+for (const bad of [String.raw`\frac{`.repeat(24), String.raw`\frac{`.repeat(600), String.raw`\underbrace{`.repeat(24)]) fast(() => texToUnicode(bad, { display: true }))
+fast(() => extractMath('\\['.repeat(50000)))
+
 console.log('latex selftest OK')

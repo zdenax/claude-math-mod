@@ -1,6 +1,8 @@
 {
   "name": "latex-pane",
   "version": "0.1.0",
+  "license": "MIT",
+  "repository": "https://github.com/zdenax/claude-math-mod",
   "description": "Side pane that shows LaTeX from the last answer as readable Unicode text",
   "types": "./types/index.d.ts"
 }

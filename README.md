@@ -20,7 +20,7 @@ Obrázek „po" je render textu, který vrací překladač (`texToUnicode`), ne 
 
 Umí zlomky na dva řádky (úzký panel přejde na `(a)/(b)`), `\binom`, `\sum` a `\prod` s mezemi, horní a dolní indexy, `\underbrace`/`\overbrace`, řecká písmena, relace a operátory, `\sqrt`, `\text`, `\mathbb`. Rozbitý vstup panel nesundá, ukáže se původní text.
 
-Neumí matice, `cases` a `align` jinak než jako řádky pod sebou, `\left`/`\right` se ignorují, akcenty (`\hat`, `\vec`) se zahazují. Každé zjednodušení je v kódu označené komentářem `shortcut:`. Písmo bez znaků ⎛ ⎝ ∑ ⁿ ᵏ rozhodí 2D zápis (v obrázku výše jsou proto použité znaky z Adwaita Mono).
+Neumí matice, `cases` a `align` jinak než jako řádky pod sebou, `\left`/`\right` se ignorují, akcenty (`\hat`, `\vec`) se vypíšou jako text (`\hat x`). Známá zjednodušení jsou v kódu označená komentářem `shortcut:`. Příliš hluboce vnořené zlomky a vzorce nad 4000 znaků se zobrazí jako původní text; z odpovědi se hledá jen prvních 50 000 znaků. Písmo bez znaků ⎛ ⎝ ∑ ⁿ ᵏ rozhodí 2D zápis (v obrázku výše jsou proto použité znaky z Adwaita Mono).
 
 ## Test
 
